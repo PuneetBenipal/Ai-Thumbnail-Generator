@@ -9,6 +9,7 @@ interface GeneratorControlsProps {
   mediaFile: MediaFile | null;
   thumbnailStyle: ThumbnailStyle;
   setThumbnailStyle: (style: ThumbnailStyle) => void;
+  credits: number;
 }
 
 const styles: ThumbnailStyle[] = ['Cinematic', 'Minimalist', 'Cartoonish', 'Retro'];
@@ -20,34 +21,42 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   isLoading,
   mediaFile,
   thumbnailStyle,
-  setThumbnailStyle
+  setThumbnailStyle,
+  credits
 }) => {
-  const canGenerate = !!mediaFile && !isLoading;
+  const hasNoCredits = credits <= 0;
+  const canGenerate = !!mediaFile && !isLoading && !!prompt && !hasNoCredits;
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col">
+    <>
       <div>
-        <h2 className="text-xl font-semibold text-white mb-4">2. Describe Your Video</h2>
+        <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+            <span className="flex items-center justify-center w-7 h-7 bg-purple-600 rounded-full text-sm font-bold">2</span>
+            Describe Your Video
+        </h2>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g., A tutorial on how to bake a chocolate cake, targeting beginners. Mention key steps like mixing ingredients and baking times."
-          className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors h-24 resize-none"
+          placeholder="e.g., A tutorial on how to bake a chocolate cake, targeting beginners."
+          className="w-full p-3 bg-white/5 border border-white/20 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors h-28 resize-none text-gray-300"
           disabled={isLoading}
         />
       </div>
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold text-white mb-3">3. Select Thumbnail Style</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div>
+        <h3 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+            <span className="flex items-center justify-center w-7 h-7 bg-purple-600 rounded-full text-sm font-bold">3</span>
+            Select Style
+        </h3>
+        <div className="grid grid-cols-2 gap-2">
             {styles.map(style => (
                 <button
                     key={style}
                     onClick={() => setThumbnailStyle(style)}
                     disabled={isLoading}
-                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-colors duration-200 disabled:cursor-not-allowed ${
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed border-2 ${
                         thumbnailStyle === style
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-transparent text-gray-300 hover:border-white/50'
                     }`}
                 >
                     {style}
@@ -55,10 +64,15 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
             ))}
         </div>
       </div>
+      {hasNoCredits && (
+        <div className="text-center p-3 bg-yellow-900/50 text-yellow-300 border border-yellow-700/50 rounded-md text-sm">
+            You're out of credits! Please purchase more to continue.
+        </div>
+      )}
       <button
         onClick={onGenerate}
         disabled={!canGenerate}
-        className="mt-auto pt-4 w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-md hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-100 flex items-center justify-center"
+        className="w-full px-4 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-bold rounded-lg hover:from-fuchsia-700 hover:to-purple-700 disabled:bg-gradient-to-r disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-100 flex items-center justify-center shadow-lg hover:shadow-purple-500/50"
       >
         {isLoading ? (
           <>
@@ -72,6 +86,6 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
           '✨ Generate Content'
         )}
       </button>
-    </div>
+    </>
   );
 };

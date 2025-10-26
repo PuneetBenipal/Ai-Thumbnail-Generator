@@ -54,12 +54,19 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onMediaUpload, med
     event.preventDefault();
     event.stopPropagation();
   };
+  
+  const handleRemoveMedia = () => {
+      onMediaUpload(null);
+  }
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold text-white mb-4">1. Upload Image or Video</h2>
+    <div>
+      <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+        <span className="flex items-center justify-center w-7 h-7 bg-purple-600 rounded-full text-sm font-bold">1</span>
+        Upload Media
+      </h2>
       <div 
-        className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-purple-500 transition-colors"
+        className="border-2 border-dashed border-white/20 rounded-lg p-4 text-center cursor-pointer hover:border-purple-500 transition-colors"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={() => !mediaFile && document.getElementById('file-upload')?.click()}
@@ -73,32 +80,33 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onMediaUpload, med
         />
         {!mediaFile && (
           <div>
-            <svg className="mx-auto h-12 w-12 text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-            </svg>
-            <p className="mt-2 text-gray-300">
-              <span className="font-semibold text-purple-400">Click to upload</span> or drag and drop
+            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+            <p className="mt-2 text-gray-400 text-sm">
+              <span className="font-semibold text-purple-400">Click to upload</span> or drag & drop
             </p>
-            <p className="text-xs text-gray-500">PNG, JPG, MP4, etc.</p>
+            <p className="text-xs text-gray-500">Image or Video</p>
           </div>
         )}
         
-        {mediaFile && 'base64' in mediaFile && (
-           <div className="relative">
-             <img 
-               src={`data:${mediaFile.file.type};base64,${mediaFile.base64}`} 
-               alt="Preview" 
-               className="mx-auto max-h-48 rounded-md"
-             />
-             <p className="text-sm text-gray-400 mt-2 truncate">{mediaFile.file.name}</p>
+        {mediaFile && (
+           <div className="relative group">
+             {'base64' in mediaFile && (
+                 <img 
+                   src={`data:${mediaFile.file.type};base64,${mediaFile.base64}`} 
+                   alt="Preview" 
+                   className="mx-auto max-h-40 rounded-md"
+                 />
+             )}
+             {'url' in mediaFile && (
+                <video src={mediaFile.url} controls className="w-full rounded-md max-h-40" />
+             )}
+             <div className="absolute inset-0 bg-black/70 rounded-md flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <p className="text-sm text-white mb-2 truncate max-w-[90%]">{mediaFile.file.name}</p>
+                <button onClick={handleRemoveMedia} className="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-700">
+                    Remove
+                </button>
+             </div>
            </div>
-        )}
-
-        {mediaFile && 'url' in mediaFile && (
-            <div className="space-y-4">
-                <video src={mediaFile.url} controls className="w-full rounded-md max-h-48" />
-                <p className="text-sm text-gray-400 mt-2 truncate">{mediaFile.file.name}</p>
-            </div>
         )}
       </div>
     </div>

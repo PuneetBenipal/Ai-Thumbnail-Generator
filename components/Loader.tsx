@@ -7,9 +7,12 @@ interface LoaderProps {
 
 export const Loader: React.FC<LoaderProps> = ({ message }) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-gray-800/50 border-2 border-dashed border-gray-700 rounded-lg p-8">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
-      <p className="mt-4 text-lg text-gray-300 font-semibold">{message}</p>
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] bg-white/5 border border-dashed border-white/10 rounded-xl p-8 animate-fade-in">
+      <div className="relative flex items-center justify-center h-20 w-20">
+        <div className="absolute h-full w-full rounded-full border-2 border-purple-500/50"></div>
+        <div className="absolute h-full w-full rounded-full border-t-2 border-purple-500 animate-spin"></div>
+      </div>
+      <p className="mt-4 text-lg text-gray-300 font-semibold tracking-wide">{message}</p>
     </div>
   );
 };

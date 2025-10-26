@@ -84,59 +84,26 @@ export const analyzeImage = async (base64Image: string, mimeType: string): Promi
     }
 };
 
-export const analyzeVideoFile = async (videoFile: File, onProgress: (message: string) => void): Promise<string> => {
+export const analyzeVideoFrames = async (frames: string[]): Promise<string> => {
     try {
-        onProgress("Uploading video... This may take a moment.");
-        const uploadResponse = await ai.files.upload({
-            file: videoFile,
-        });
-
-        if (!uploadResponse.file?.name) {
-             throw new Error("File upload failed: The API did not return the expected file metadata.");
-        }
-
-        let file = uploadResponse.file;
-        
-        onProgress("Processing video... This can take several minutes.");
-        while (file.state === 'PROCESSING') {
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
-            const getFileResponse = await ai.files.get({ name: file.name });
-            file = getFileResponse.file;
-        }
-
-        if (file.state === 'FAILED') {
-            throw new Error(`Video processing failed: ${file.stateDescription}`);
-        }
-
-        if (file.state !== 'ACTIVE') {
-            throw new Error(`Unexpected video file state: ${file.state}`);
-        }
-
-        onProgress("Analyzing video with Gemini...");
-        const videoPart = {
-            fileData: {
-                mimeType: file.mimeType as string,
-                fileUri: file.uri as string,
-            }
-        };
+        const imageParts = frames.map(frame => ({
+            inlineData: { data: frame, mimeType: 'image/jpeg' }
+        }));
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-pro',
             contents: { parts: [
-                videoPart,
-                { text: "Analyze this video and provide a summary for a thumbnail creator. Describe the key subjects, the overall mood, and suggest 2-3 visually interesting moments that would make a great thumbnail." }
+                ...imageParts,
+                { text: "Analyze this sequence of video frames and provide a summary for a thumbnail creator. Describe the key subjects, the overall mood, and suggest 2-3 visually interesting moments that would make a great thumbnail." }
             ]},
         });
-
         return response.text;
     } catch (error) {
-        console.error("Error analyzing video file:", error);
-        if (error instanceof Error) {
-            throw new Error(`Failed to analyze video with Gemini API. ${error.message}`);
-        }
-        throw new Error("Failed to analyze video with Gemini API due to an unknown error.");
+        console.error("Error analyzing video frames:", error);
+        throw new Error("Failed to analyze video frames with Gemini API.");
     }
 };
+
 
 export const editImageWithPrompt = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
     try {
